@@ -1,7 +1,12 @@
+using OAuth.Line.Core;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+//µù¥UOAuth.Line.Core DI ³]©w
+builder.Services.AddCoreLibs(builder.Configuration);
 
 var app = builder.Build();
 
@@ -13,7 +18,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();

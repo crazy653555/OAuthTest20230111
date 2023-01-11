@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OAuth.Web.Models;
 using System.Diagnostics;
-using System.Text.Encodings.Web;
-using Microsoft.AspNetCore.Server.IIS.Core;
 using OAuth.Line.Core.LineLogin;
 
 namespace OAuth.Web.Controllers
@@ -11,7 +9,7 @@ namespace OAuth.Web.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly LineLoginService _lineLoginService;
-        //private readonly LineLoginConfig _lineLoginConfig;
+        private readonly LineLoginConfig _lineLoginConfig;
 
         //private string _lineLoginRedirectUri
         //{
@@ -20,13 +18,13 @@ namespace OAuth.Web.Controllers
 
         public HomeController(
             ILogger<HomeController> logger,
-            LineLoginService lineLoginService
-            //LineLoginConfig lineLoginConfig
+            LineLoginService lineLoginService,
+            LineLoginConfig lineLoginConfig
             )
         {
             _logger = logger;
             _lineLoginService = lineLoginService;
-            //_lineLoginConfig = lineLoginConfig;
+            _lineLoginConfig = lineLoginConfig;
         }
 
         public IActionResult Index()
