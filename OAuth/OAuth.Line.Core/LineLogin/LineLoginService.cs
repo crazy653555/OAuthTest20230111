@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Net.Http.Headers;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 
@@ -45,27 +46,23 @@ namespace OAuth.Line.Core.LineLogin
             var responseStream = await response.Content.ReadAsStreamAsync();
             return JsonSerializer.Deserialize<LineLoginAccessToken>(responseStream);
         }
+
+        /// <summary>
+        /// 取得 Line 使用者資料
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <returns></returns>
+        public async Task<LineLoginUserProfile> GetUserProfileAsync(string accessToken)
+        {
+            var endpoint = "https://api.line.me/v2/profile";
+            var request = new HttpRequestMessage(HttpMethod.Get, endpoint);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            var response = await _httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            var responseStream = await response.Content.ReadAsStreamAsync();
+            return JsonSerializer.Deserialize<LineLoginUserProfile>(responseStream);
+        }
     }
 
-    public class LineLoginAccessToken
-    {
-        [JsonPropertyName("access_token")]
-        public string AccessToken { get; set; }
-
-        [JsonPropertyName("expires_in")]
-        public int ExpiresIn { get; set; }
-
-        [JsonPropertyName("id_token")]
-        public string IdToken { get; set; }
-
-        [JsonPropertyName("refresh_token")]
-        public string RefreshToken { get; set; }
-
-        [JsonPropertyName("scope")]
-        public string Scope { get; set; }
-
-        [JsonPropertyName("token_type")]
-        public string TokenType { get; set; }
-
-    }
 }

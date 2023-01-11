@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OAuth.Web.Models;
 using System.Diagnostics;
+using System.Net;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
@@ -41,8 +42,30 @@ namespace OAuth.Web.Controllers
             _lineLoginService = lineLoginService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
+            // 如果有登入過，目前會把資料存在 cookie 中
+            var accessToken = HttpContext.Request.Cookies["AccessToken"];
+            var idToken = HttpContext.Request.Cookies["IdToken"];
+
+            if (string.IsNullOrEmpty(accessToken) || string.IsNullOrEmpty(idToken))
+            {
+                return View();
+            }
+
+            // 驗證 LineLogin 的 access token
+
+            // 驗證 LineLogin 的 id token
+
+            // 取得目前的 user profile
+            var user = await _lineLoginService.GetUserProfileAsync(accessToken);
+
+            // 檢查是否已綁定 Line Notify
+
+
+            ViewBag.User = user;
+            //ViewBag.IsLineNotifyBinded = isLineNotifyBinded;
+
             return View();
         }
 
