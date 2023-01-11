@@ -10,7 +10,7 @@ namespace OAuth.Web.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly LineLoginConfig _lineLoginConfigOptions;
+        private readonly LineLoginConfig _lineLoginConfig;
         private readonly LineLoginService _lineLoginService;
 
         private string _lineLoginRedirectUri
@@ -20,7 +20,7 @@ namespace OAuth.Web.Controllers
                 var requestScheme = Request.Scheme;
                 var requestHost = Request.Host;
                 var requestPathBase = Request.PathBase;
-                var returnPath = _lineLoginConfigOptions.ReturnPath;
+                var returnPath = _lineLoginConfig.ReturnPath;
 
                 return $"{requestScheme}://{requestHost}{requestPathBase}{returnPath}";
             }
@@ -34,7 +34,7 @@ namespace OAuth.Web.Controllers
         )
         {
             _logger = logger;
-            _lineLoginConfigOptions = lineLoginConfigOptions.Value;
+            _lineLoginConfig = lineLoginConfigOptions.Value;
             _lineLoginService = lineLoginService;
         }
 
@@ -48,9 +48,30 @@ namespace OAuth.Web.Controllers
             var state = "3393";
 
             // 轉到 Line Login 登入網址
-            var lineLoginUrl = _lineLoginService.GenerateLineLoginUrl(_lineLoginConfigOptions.ChannelId, UrlEncoder.Default.Encode(_lineLoginRedirectUri), state);
+            var lineLoginUrl = _lineLoginService.GenerateLineLoginUrl(_lineLoginConfig.ChannelId, UrlEncoder.Default.Encode(_lineLoginRedirectUri), state);
 
-            //return Redirect(lineLoginUrl);
+            return Redirect(lineLoginUrl);
+        }
+
+
+        /// <summary>
+        /// Line Login 的 callback action
+        /// </summary>
+        /// <param name="code"></param>
+        /// <param name="state"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> LineLoginCallback([FromQuery(Name = "code")] string code,
+            [FromQuery(Name = "state")] string state)
+        {
+            if (string.IsNullOrEmpty(code))
+            {
+                return BadRequest();
+            }
+
+            // 驗證 state 簽章
+
+            // 透過 code 取得 access token
+            var accessToken = await _lineLoginService.GetAccessTokenAsync(code, _lineLoginConfig.ChannelId, _lineLoginConfig.ChannelSecret, _lineLoginRedirectUri);
 
             throw new Exception();
         }
