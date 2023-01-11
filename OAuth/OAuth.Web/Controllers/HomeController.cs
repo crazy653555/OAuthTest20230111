@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OAuth.Web.Models;
 using System.Diagnostics;
+using System.Text.Encodings.Web;
+using Microsoft.Extensions.Options;
 using OAuth.Line.Core.LineLogin;
 
 namespace OAuth.Web.Controllers
@@ -8,23 +10,32 @@ namespace OAuth.Web.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly LineLoginConfig _lineLoginConfigOptions;
         private readonly LineLoginService _lineLoginService;
-        private readonly LineLoginConfig _lineLoginConfig;
 
-        //private string _lineLoginRedirectUri
-        //{
-        //    get { return $"{Request.Scheme}://{Request.Host}{Request.PathBase}{_lineLoginConfig.ReturnPath}"; }
-        //}
+        private string _lineLoginRedirectUri
+        {
+            get
+            {
+                var requestScheme = Request.Scheme;
+                var requestHost = Request.Host;
+                var requestPathBase = Request.PathBase;
+                var returnPath = _lineLoginConfigOptions.ReturnPath;
+
+                return $"{requestScheme}://{requestHost}{requestPathBase}{returnPath}";
+            }
+        }
 
         public HomeController(
             ILogger<HomeController> logger,
-            LineLoginService lineLoginService,
-            LineLoginConfig lineLoginConfig
-            )
+            IOptions<LineLoginConfig> lineLoginConfigOptions,
+            LineLoginService lineLoginService
+
+        )
         {
             _logger = logger;
+            _lineLoginConfigOptions = lineLoginConfigOptions.Value;
             _lineLoginService = lineLoginService;
-            _lineLoginConfig = lineLoginConfig;
         }
 
         public IActionResult Index()
@@ -37,7 +48,7 @@ namespace OAuth.Web.Controllers
             var state = "3393";
 
             // 轉到 Line Login 登入網址
-            //var lineLoginUrl = _lineLoginService.GenerateLineLoginUrl(_lineLoginConfig.ChannelId, UrlEncoder.Default.Encode(_lineLoginRedirectUri), state);
+            var lineLoginUrl = _lineLoginService.GenerateLineLoginUrl(_lineLoginConfigOptions.ChannelId, UrlEncoder.Default.Encode(_lineLoginRedirectUri), state);
 
             //return Redirect(lineLoginUrl);
 
