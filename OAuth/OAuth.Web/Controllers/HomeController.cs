@@ -8,6 +8,8 @@ using System.Text.Json;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using OAuth.Line.Core.LineLogin;
+using OAuth.Line.Core.Jwt;
+using System.Security.Claims;
 
 namespace OAuth.Web.Controllers
 {
@@ -16,6 +18,8 @@ namespace OAuth.Web.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly LineLoginConfig _lineLoginConfig;
         private readonly LineLoginService _lineLoginService;
+        private readonly JwtService _jwtService;
+        private readonly JwtConfig _jwtConfig;
 
         private string _lineLoginRedirectUri
         {
@@ -33,13 +37,16 @@ namespace OAuth.Web.Controllers
         public HomeController(
             ILogger<HomeController> logger,
             IOptions<LineLoginConfig> lineLoginConfigOptions,
-            LineLoginService lineLoginService
-
+            IOptions<JwtConfig> jwtConfigOptions,
+            LineLoginService lineLoginService,
+            JwtService jwtService
         )
         {
             _logger = logger;
             _lineLoginConfig = lineLoginConfigOptions.Value;
+            _jwtConfig = jwtConfigOptions.Value;
             _lineLoginService = lineLoginService;
+            _jwtService = jwtService;
         }
 
         public async Task<IActionResult> Index()
@@ -71,7 +78,11 @@ namespace OAuth.Web.Controllers
 
         public IActionResult LineLogin()
         {
-            var state = "3393";
+
+            //var state = "3393";
+            // 產生一個包含簽章的 jtw token 來當作 state，以避免 CSRF 攻擊
+            var state = _jwtService.GenerateToken(_jwtConfig.SignKey, _jwtConfig.Issuer, new Claim[] { }, DateTime.UtcNow.AddMinutes(10));
+
 
             // 轉到 Line Login 登入網址
             var lineLoginUrl = _lineLoginService.GenerateLineLoginUrl(_lineLoginConfig.ChannelId, UrlEncoder.Default.Encode(_lineLoginRedirectUri), state);
@@ -86,8 +97,7 @@ namespace OAuth.Web.Controllers
         /// <param name="code"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        public async Task<IActionResult> LineLoginCallback([FromQuery(Name = "code")] string code,
-            [FromQuery(Name = "state")] string state)
+        public async Task<IActionResult> LineLoginCallback([FromQuery(Name = "code")] string code, [FromQuery(Name = "state")] string state)
         {
             if (string.IsNullOrEmpty(code))
             {
@@ -95,6 +105,12 @@ namespace OAuth.Web.Controllers
             }
 
             // 驗證 state 簽章
+            var stateValidateResult = _jwtService.ValidateToken(state, _jwtConfig.Issuer, _jwtConfig.SignKey, out var exception);
+            if (stateValidateResult is null)
+            {
+                _logger.LogError(exception.Message);
+                return BadRequest();
+            }
 
             // 透過 code 取得 access token
             var accessToken = await _lineLoginService.GetAccessTokenAsync(code, _lineLoginConfig.ChannelId, _lineLoginConfig.ChannelSecret, _lineLoginRedirectUri);

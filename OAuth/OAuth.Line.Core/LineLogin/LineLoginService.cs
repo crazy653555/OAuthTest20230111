@@ -62,6 +62,7 @@ namespace OAuth.Line.Core.LineLogin
 
             var responseStream = await response.Content.ReadAsStreamAsync();
             return JsonSerializer.Deserialize<LineLoginUserProfile>(responseStream);
+
         }
     }
 

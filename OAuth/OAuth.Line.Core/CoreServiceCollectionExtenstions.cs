@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using OAuth.Line.Core.Jwt;
 using OAuth.Line.Core.LineLogin;
 
 namespace OAuth.Line.Core;
@@ -18,8 +19,10 @@ public static class CoreServiceCollectionExtenstions
 
         //設定Mapper資料，Mapper到OAth.Web中的appsettings.json
         services.Configure<LineLoginConfig>(configuration.GetSection("LineLogin"));
+        services.Configure<JwtConfig>(configuration.GetSection("Jwt"));
 
         //設定class
         services.AddScoped<LineLoginService>();
+        services.AddScoped<JwtService>();
     }
 }
