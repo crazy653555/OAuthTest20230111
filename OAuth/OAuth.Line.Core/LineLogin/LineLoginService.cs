@@ -1,6 +1,5 @@
 ﻿using System.Net.Http.Headers;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 
 namespace OAuth.Line.Core.LineLogin
@@ -66,13 +65,28 @@ namespace OAuth.Line.Core.LineLogin
         }
 
         /// <summary>
+        /// 驗證 Line Login 的 access token
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <returns></returns>
+        public async Task<LineLoginVerifyAccessTokenResult> VerifyAccessTokenAsync(string accessToken)
+        {
+            var endpoint = $"https://api.line.me/oauth2/v2.1/verify?access_token={accessToken}";
+            var response = await _httpClient.GetAsync(endpoint);
+            response.EnsureSuccessStatusCode();
+
+            var responseStream = await response.Content.ReadAsStreamAsync();
+            return JsonSerializer.Deserialize<LineLoginVerifyAccessTokenResult>(responseStream);
+        }
+
+        /// <summary>
         /// 撤銷 Line Login 的 access token
         /// </summary>
         /// <param name="accessToken"></param>
         /// <param name="clientId"></param>
         /// <param name="clientSecret"></param>
         /// <returns></returns>
-        public async Task RevokeAccessTokenAsync(string? accessToken, string clientId, string clientSecret)
+        public async Task RevokeAccessTokenAsync(string accessToken, string clientId, string clientSecret)
         {
             var endpoint = "https://api.line.me/oauth2/v2.1/revoke";
             var response = await _httpClient.PostAsync(endpoint, new FormUrlEncodedContent(new Dictionary<string, string>
@@ -83,6 +97,25 @@ namespace OAuth.Line.Core.LineLogin
             }));
             response.EnsureSuccessStatusCode();
         }
-    }
 
+        /// <summary>
+        /// 驗證 Line Login 的 id token
+        /// </summary>
+        /// <param name="idToken"></param>
+        /// <param name="cliendId"></param>
+        /// <returns></returns>
+        public async Task<LineLoginVerifyIdTokenResult> VerifyIdTokenAsync(string idToken, string cliendId)
+        {
+            var endpoint = "https://api.line.me/oauth2/v2.1/verify";
+            var response = await _httpClient.PostAsync(endpoint, new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                { "id_token", idToken },
+                { "client_id", cliendId }
+            }));
+            response.EnsureSuccessStatusCode();
+
+            var responseStream = await response.Content.ReadAsStreamAsync();
+            return JsonSerializer.Deserialize<LineLoginVerifyIdTokenResult>(responseStream);
+        }
+    }
 }

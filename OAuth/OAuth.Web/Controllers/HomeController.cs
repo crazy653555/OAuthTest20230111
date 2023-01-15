@@ -61,8 +61,28 @@ namespace OAuth.Web.Controllers
             }
 
             // 驗證 LineLogin 的 access token
+            LineLoginVerifyAccessTokenResult accessTokenVerifyResult = null;
+            try
+            {
+                accessTokenVerifyResult = await _lineLoginService.VerifyAccessTokenAsync(accessToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return View();
+            }
 
             // 驗證 LineLogin 的 id token
+            LineLoginVerifyIdTokenResult idTokenVerifyResult = null;
+            try
+            {
+                idTokenVerifyResult = await _lineLoginService.VerifyIdTokenAsync(idToken, _lineLoginConfig.ChannelId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return View();
+            }
 
             // 取得目前的 user profile
             var user = await _lineLoginService.GetUserProfileAsync(accessToken);
@@ -174,9 +194,8 @@ namespace OAuth.Web.Controllers
         /// 登出 Line Login
         /// </summary>
         /// <returns></returns>
-        public async Task<IActionResult> LineLogout()
+        public async Task<IActionResult> LineLogoutAsync()
         {
-
             var accessToken = HttpContext.Request.Cookies["AccessToken"];
             var idToken = HttpContext.Request.Cookies["IdToken"];
 
