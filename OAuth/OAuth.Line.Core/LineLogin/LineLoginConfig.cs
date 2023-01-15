@@ -5,7 +5,12 @@ public class LineLoginConfig
     /// <summary>
     /// OAuth Server Url
     /// </summary>
-    public string OAuthEndPoint { get; set; }
+    public string OAuthEndpoint { get; set; }
+
+    /// <summary>
+    /// AccessToken Server Url
+    /// </summary>
+    public string AccessTokenEndpoint { get; set; }
 
     /// <summary>
     /// 帳號

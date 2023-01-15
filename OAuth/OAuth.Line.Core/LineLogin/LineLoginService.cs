@@ -24,15 +24,15 @@ namespace OAuth.Line.Core.LineLogin
         /// <summary>
         /// 取得 Line Login 的 access token
         /// </summary>
+        /// <param name="accessTokenEndpoint"></param>
         /// <param name="code"></param>
         /// <param name="clientId"></param>
         /// <param name="clientSecret"></param>
         /// <param name="redirectUri"></param>
         /// <returns></returns>
-        public async Task<LineLoginAccessToken> GetAccessTokenAsync(string code, string clientId, string clientSecret, string redirectUri)
+        public async Task<LineLoginAccessToken> GetAccessTokenAsync(string accessTokenEndpoint, string code, string clientId, string clientSecret, string redirectUri)
         {
-            var endpoint = "https://api.line.me/oauth2/v2.1/token";
-            var response = await _httpClient.PostAsync(endpoint, new FormUrlEncodedContent(new Dictionary<string, string>
+            var response = await _httpClient.PostAsync(accessTokenEndpoint, new FormUrlEncodedContent(new Dictionary<string, string>
             {
                 { "grant_type", "authorization_code" },
                 { "code", code },

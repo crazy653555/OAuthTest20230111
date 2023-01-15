@@ -105,7 +105,7 @@ namespace OAuth.Web.Controllers
 
 
             // 轉到 Line Login 登入網址
-            var lineLoginUrl = _lineLoginService.GenerateLineLoginUrl(_lineLoginConfig.OAuthEndPoint, _lineLoginConfig.ChannelId, UrlEncoder.Default.Encode(_lineLoginRedirectUri), state);
+            var lineLoginUrl = _lineLoginService.GenerateLineLoginUrl(_lineLoginConfig.OAuthEndpoint, _lineLoginConfig.ChannelId, UrlEncoder.Default.Encode(_lineLoginRedirectUri), state);
 
             return Redirect(lineLoginUrl);
         }
@@ -133,7 +133,7 @@ namespace OAuth.Web.Controllers
             }
 
             // 透過 code 取得 access token
-            var accessToken = await _lineLoginService.GetAccessTokenAsync(code, _lineLoginConfig.ChannelId, _lineLoginConfig.ChannelSecret, _lineLoginRedirectUri);
+            var accessToken = await _lineLoginService.GetAccessTokenAsync(_lineLoginConfig.AccessTokenEndpoint, code, _lineLoginConfig.ChannelId, _lineLoginConfig.ChannelSecret, _lineLoginRedirectUri);
 
             // 取得 id token 物件後，將相關資訊塞到 cookie 中
             if (TryParseIdToken(accessToken.IdToken, out var idToken))
