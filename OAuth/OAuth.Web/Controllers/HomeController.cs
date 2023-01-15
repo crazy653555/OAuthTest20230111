@@ -105,7 +105,7 @@ namespace OAuth.Web.Controllers
 
 
             // 轉到 Line Login 登入網址
-            var lineLoginUrl = _lineLoginService.GenerateLineLoginUrl(_lineLoginConfig.ChannelId, UrlEncoder.Default.Encode(_lineLoginRedirectUri), state);
+            var lineLoginUrl = _lineLoginService.GenerateLineLoginUrl(_lineLoginConfig.OAuthEndPoint, _lineLoginConfig.ChannelId, UrlEncoder.Default.Encode(_lineLoginRedirectUri), state);
 
             return Redirect(lineLoginUrl);
         }
