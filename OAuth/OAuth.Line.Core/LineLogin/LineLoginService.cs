@@ -64,6 +64,25 @@ namespace OAuth.Line.Core.LineLogin
             return JsonSerializer.Deserialize<LineLoginUserProfile>(responseStream);
 
         }
+
+        /// <summary>
+        /// 撤銷 Line Login 的 access token
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <param name="clientId"></param>
+        /// <param name="clientSecret"></param>
+        /// <returns></returns>
+        public async Task RevokeAccessTokenAsync(string? accessToken, string clientId, string clientSecret)
+        {
+            var endpoint = "https://api.line.me/oauth2/v2.1/revoke";
+            var response = await _httpClient.PostAsync(endpoint, new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                { "access_token", accessToken },
+                { "client_id", clientId },
+                { "client_secret", clientSecret }
+            }));
+            response.EnsureSuccessStatusCode();
+        }
     }
 
 }

@@ -169,5 +169,36 @@ namespace OAuth.Web.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+        /// <summary>
+        /// 登出 Line Login
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IActionResult> LineLogout()
+        {
+
+            var accessToken = HttpContext.Request.Cookies["AccessToken"];
+            var idToken = HttpContext.Request.Cookies["IdToken"];
+
+            try
+            {
+                // 撤銷 Line Login 的 access token
+                await _lineLoginService.RevokeAccessTokenAsync(accessToken, _lineLoginConfig.ChannelId, _lineLoginConfig.ChannelSecret);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+            }
+
+            // 刪除 cookie 資料
+            HttpContext.Response.Cookies.Delete("AccessToken");
+            HttpContext.Response.Cookies.Delete("ExpiresIn");
+            HttpContext.Response.Cookies.Delete("IdToken");
+            HttpContext.Response.Cookies.Delete("RefreshToken");
+            HttpContext.Response.Cookies.Delete("Scope");
+            HttpContext.Response.Cookies.Delete("TokenType");
+
+            return RedirectToAction("Index");
+        }
     }
 }
