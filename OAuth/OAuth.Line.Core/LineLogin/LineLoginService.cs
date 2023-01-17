@@ -17,7 +17,6 @@ namespace OAuth.Line.Core.LineLogin
 
         public string GenerateLineLoginUrl(string clientId, string redirectUri, string state)
         {
-            var oauthEndpoint = "https://access.line.me/oauth2/v2.1/authorize";
             var url = $"https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id={clientId}&redirect_uri={redirectUri}&state={state}&scope=openid%20profile";
             return url;
         }
@@ -34,8 +33,6 @@ namespace OAuth.Line.Core.LineLogin
             string redirectUri)
         {
             var accessTokenEndpoint = "https://api.line.me/oauth2/v2.1/token";
-
-
             var response = await _httpClient.PostAsync(accessTokenEndpoint, new FormUrlEncodedContent(new Dictionary<string, string>
             {
                 { "grant_type", "authorization_code" },
