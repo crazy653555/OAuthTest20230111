@@ -15,23 +15,27 @@ namespace OAuth.Line.Core.LineLogin
             _httpClient = httpClientFactory.CreateClient("LineLoginService");
         }
 
-        public string GenerateLineLoginUrl(string oauthEndPoint, string clientId, string redirectUri, string state)
+        public string GenerateLineLoginUrl(string clientId, string redirectUri, string state)
         {
-            var url = $"{oauthEndPoint}?response_type=code&client_id={clientId}&redirect_uri={redirectUri}&state={state}&scope=openid%20profile";
+            var oauthEndpoint = "https://access.line.me/oauth2/v2.1/authorize";
+            var url = $"https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id={clientId}&redirect_uri={redirectUri}&state={state}&scope=openid%20profile";
             return url;
         }
 
         /// <summary>
         /// 取得 Line Login 的 access token
         /// </summary>
-        /// <param name="accessTokenEndpoint"></param>
         /// <param name="code"></param>
         /// <param name="clientId"></param>
         /// <param name="clientSecret"></param>
         /// <param name="redirectUri"></param>
         /// <returns></returns>
-        public async Task<LineLoginAccessToken> GetAccessTokenAsync(string accessTokenEndpoint, string code, string clientId, string clientSecret, string redirectUri)
+        public async Task<LineLoginAccessToken> GetAccessTokenAsync(string code, string clientId, string clientSecret,
+            string redirectUri)
         {
+            var accessTokenEndpoint = "https://api.line.me/oauth2/v2.1/token";
+
+
             var response = await _httpClient.PostAsync(accessTokenEndpoint, new FormUrlEncodedContent(new Dictionary<string, string>
             {
                 { "grant_type", "authorization_code" },
@@ -53,8 +57,8 @@ namespace OAuth.Line.Core.LineLogin
         /// <returns></returns>
         public async Task<LineLoginUserProfile> GetUserProfileAsync(string accessToken)
         {
-            var endpoint = "https://api.line.me/v2/profile";
-            var request = new HttpRequestMessage(HttpMethod.Get, endpoint);
+            var proFileEndpoint = "https://api.line.me/v2/profile";
+            var request = new HttpRequestMessage(HttpMethod.Get, proFileEndpoint);
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             var response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
